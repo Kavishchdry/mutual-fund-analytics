@@ -1,5 +1,8 @@
 import pandas as pd
 import requests
+import os
+
+os.makedirs("data/raw/live_nav", exist_ok=True)
 
 schemes = {
     "HDFC_Top100_Direct": 125497,
@@ -11,8 +14,23 @@ schemes = {
 }
 
 for name, code in schemes.items():
+
     url = f"https://api.mfapi.in/mf/{code}"
 
     response = requests.get(url)
 
-    print(name, response.status_code)
+    if response.status_code == 200:
+
+        data = response.json()
+
+        nav_df = pd.DataFrame(data["data"])
+
+        nav_df.to_csv(
+            f"data/raw/live_nav/{name}.csv",
+            index=False
+        )
+
+        print(f"Saved {name}")
+
+    else:
+        print(f"Failed {name}")
